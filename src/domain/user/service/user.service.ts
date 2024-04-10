@@ -9,6 +9,9 @@ import { UserEntity } from '../entity/user.entity';
 import { Repository } from 'typeorm';
 import {
   TokenResponse,
+  UpdateUserAccountIdRequest,
+  UserElement,
+  UserResponse,
   UserSignInRequest,
   UserSignUpRequest,
 } from '../presentation/dto/user.dto';
@@ -61,6 +64,27 @@ export class UserService {
   }
 
   async deleteUser(user: UserEntity): Promise<void> {
-    await this.userRepository.delete(user);
+    await this.userRepository.remove(user);
+  }
+
+  async getUserList(): Promise<UserResponse> {
+    const users = await this.userRepository.find();
+
+    const response = users.map((user): UserElement => {
+      return {
+        accountId: user.accountId,
+        password: user.password,
+      };
+    });
+
+    return { userList: response };
+  }
+
+  async updateUserAccountId(
+    user: UserEntity,
+    request: UpdateUserAccountIdRequest,
+  ) {
+    user.updateUserAccountId(request.accountId);
+    await this.userRepository.save(user);
   }
 }

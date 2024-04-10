@@ -1,7 +1,17 @@
-import { Body, Controller, Delete, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import {
   TokenResponse,
+  UpdateUserAccountIdRequest,
+  UserResponse,
   UserSignInRequest,
   UserSignUpRequest,
 } from './dto/user.dto';
@@ -27,5 +37,19 @@ export class UserController {
   @UseGuards(JwtGuard)
   async deleteUser(@CurrentUser() user: UserEntity) {
     await this.userService.deleteUser(user);
+  }
+
+  @Get('/list')
+  async getUserList(): Promise<UserResponse> {
+    return await this.userService.getUserList();
+  }
+
+  @Put()
+  @UseGuards(JwtGuard)
+  async updateUserAccountId(
+    @CurrentUser() user: UserEntity,
+    @Body() request: UpdateUserAccountIdRequest,
+  ) {
+    await this.userService.updateUserAccountId(user, request);
   }
 }

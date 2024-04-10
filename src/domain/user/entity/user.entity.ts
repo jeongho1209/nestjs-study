@@ -15,4 +15,8 @@ export class UserEntity {
     this.accountId = accountId;
     this.password = password;
   }
+
+  updateUserAccountId(accountId: string) {
+    this.accountId = accountId;
+  }
 }
