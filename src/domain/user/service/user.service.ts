@@ -13,6 +13,7 @@ import {
   UserSignUpRequest,
 } from '../presentation/dto/user.dto';
 import { JwtProvider } from '../../../global/security/jwt.provider';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -31,8 +32,11 @@ export class UserService {
       throw new ConflictException('User Exists');
     }
 
+    const saltOrRounds = 10;
+    const encryptPassword = await bcrypt.hash(request.password, saltOrRounds);
+
     await this.userRepository.save(
-      new UserEntity(request.accountId, request.password),
+      new UserEntity(request.accountId, encryptPassword),
     );
   }
 
@@ -45,7 +49,11 @@ export class UserService {
       throw new NotFoundException('User Not Found');
     }
 
-    if (request.password !== user.password) {
+    const isInValidPassword = !(await bcrypt.compare(
+      request.password,
+      user.password,
+    ));
+    if (isInValidPassword) {
       throw new UnauthorizedException('Password Mis Match');
     }
 
