@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../entity/user.entity';
 import { Repository } from 'typeorm';
 import {
+  TokenResponse,
   UserSignInRequest,
   UserSignUpRequest,
 } from '../presentation/dto/user.dto';
@@ -35,7 +36,7 @@ export class UserService {
     );
   }
 
-  async signIn(request: UserSignInRequest): Promise<string> {
+  async signIn(request: UserSignInRequest): Promise<TokenResponse> {
     const user = await this.userRepository.findOneBy({
       accountId: request.accountId,
     });
@@ -49,5 +50,9 @@ export class UserService {
     }
 
     return this.jwtProvider.generateToken(request.accountId);
+  }
+
+  async deleteUser(user: UserEntity): Promise<void> {
+    await this.userRepository.delete(user);
   }
 }

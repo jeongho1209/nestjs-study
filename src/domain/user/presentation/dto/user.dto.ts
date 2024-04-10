@@ -7,3 +7,7 @@ export class UserSignInRequest {
   accountId: string;
   password: string;
 }
+
+export class TokenResponse {
+  accessToken: string;
+}
