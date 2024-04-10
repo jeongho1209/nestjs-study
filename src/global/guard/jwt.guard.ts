@@ -20,16 +20,15 @@ export class JwtGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    const token = this.getTokenFromHeader(request.headers);
+    const token = this.getTokenFromHeader(request.headers['authorization']);
 
     if (token === null) {
       return true;
     }
 
     const sub = this.parseToken(token);
-    const currentUser = await this.userRepository.findOneBy({
-      accountId: sub,
-    });
+    const currentUser = await this.queryUserByAccountId(sub['sub']);
+    request.user = new UserEntity(currentUser.accountId, currentUser.password);
 
     return Boolean(currentUser);
   }
@@ -42,13 +41,22 @@ export class JwtGuard implements CanActivate {
       throw new UnauthorizedException(e.message);
     }
 
-    if (parsed.typ != 'access') {
-      throw new UnauthorizedException('Invalid Token');
-    }
     return parsed;
   }
 
   private getTokenFromHeader(header: any): string {
     return header?.substring(7);
+  }
+
+  private async queryUserByAccountId(accountId: string): Promise<UserEntity> {
+    const currentUser = await this.userRepository.findOneBy({
+      accountId: accountId,
+    });
+
+    if (!currentUser) {
+      throw new UnauthorizedException('User Not Found');
+    }
+
+    return currentUser;
   }
 }

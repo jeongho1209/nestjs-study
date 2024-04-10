@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { TokenResponse } from '../../domain/user/presentation/dto/user.dto';
 
 @Injectable()
 export class JwtProvider {
@@ -8,8 +9,11 @@ export class JwtProvider {
     // refreshToken 추가 필요
   ) {}
 
-  async generateToken(accountId: string): Promise<string> {
-    return await this.signJwt(accountId, '1h');
+  async generateToken(accountId: string): Promise<TokenResponse> {
+    const token = await this.signJwt(accountId, '1h');
+    return {
+      accessToken: token,
+    };
   }
 
   private async signJwt(accountId: string, exp: string) {
